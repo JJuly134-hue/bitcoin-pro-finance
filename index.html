@@ -45,4 +45,23 @@ function openModal(type){const signup=type==='signup';document.getElementById('m
 function closeModal(){document.getElementById('modal').classList.remove('open')}
 let toastTimer;function notify(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3500)}
 </script>
+  <script>
+async function updateCryptoPrices() {
+  const url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,solana&vs_currencies=usd";
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Price request failed");
+
+    const prices = await response.json();
+
+    console.log("Live cryptocurrency prices:", prices);
+  } catch (error) {
+    console.log("Unable to load cryptocurrency prices.", error);
+  }
+}
+
+updateCryptoPrices();
+setInterval(updateCryptoPrices, 60000);
+  </script>
 </body></html>
