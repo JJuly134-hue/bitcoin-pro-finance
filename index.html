@@ -24,6 +24,9 @@
 </section>
 <div class="stats"><div class="stat"><div class="cardlabel">Supported assets</div><div class="value">BTC · ETH · USDT</div><div class="cardlabel">And other major crypto assets</div></div><div class="stat"><div class="cardlabel">Designed for you</div><div class="value">One clear dashboard</div><div class="cardlabel">Portfolio tools in one place</div></div><div class="stat"><div class="cardlabel">Security-first approach</div><div class="value">Built with care</div><div class="cardlabel">Real-money features require secure setup</div></div></div>
 <section id="markets"><div class="section-head"><div><h2>Crypto market watch</h2><p>Illustrative sample values for this design preview.</p></div><span class="demo">NOT LIVE MARKET DATA</span></div>
+<div id="live-prices" style="margin:16px 0;padding:16px;background:#121a2a;color:#ffffff;border-radius:12px;">
+  Loading live cryptocurrency prices...
+</div>  
 <div class="section-card market"><table class="table"><thead><tr><th>Asset</th><th>Price (USD)</th><th>24h change</th><th>Market</th></tr></thead><tbody>
 <tr><td><div class="asset"><div class="asset-icon" style="color:#f5b942">₿</div><div>Bitcoin<small>BTC</small></div></div></td><td>$67,420.18</td><td class="up">+2.41%</td><td>Crypto</td></tr>
 <tr><td><div class="asset"><div class="asset-icon" style="color:#a8b5ff">◆</div><div>Ethereum<small>ETH</small></div></div></td><td>$3,520.76</td><td class="up">+1.82%</td><td>Crypto</td></tr>
@@ -45,23 +48,55 @@ function openModal(type){const signup=type==='signup';document.getElementById('m
 function closeModal(){document.getElementById('modal').classList.remove('open')}
 let toastTimer;function notify(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3500)}
 </script>
-  <script>
+<script>
 async function updateCryptoPrices() {
-  const url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,solana&vs_currencies=usd";
+  const box = document.getElementById("live-prices");
+  const url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,solana&vs_currencies=usd&include_24hr_change=true";
 
   try {
+    box.textContent = "Loading live prices...";
     const response = await fetch(url);
     if (!response.ok) throw new Error("Price request failed");
-
     const prices = await response.json();
 
-    console.log("Live cryptocurrency prices:", prices);
+    const coins = [
+      ["Bitcoin", "bitcoin", "BTC"],
+      ["Ethereum", "ethereum", "ETH"],
+      ["Tether", "tether", "USDT"],
+      ["Solana", "solana", "SOL"]
+    ];
+
+    box.innerHTML = "<h3>Live Cryptocurrency Prices (USD)</h3>";
+
+    coins.forEach(([name, id, symbol]) => {
+      if (!prices[id]) return;
+      const coin = prices[id];
+      const change = coin.usd_24h_change;
+      const changeText = typeof change === "number"
+        ? change.toFixed(2) + "%"
+        : "Unavailable";
+
+      const row = document.createElement("div");
+      row.style.cssText = "padding:12px;margin:8px 0;background:#18212b;border-radius:8px;";
+      row.textContent = name + " (" + symbol + "): $" +
+        coin.usd.toLocaleString("en-US", {maximumFractionDigits: 6}) +
+        " | 24-hour change: " + changeText;
+      box.appendChild(row);
+    });
+
+    const note = document.createElement("small");
+    note.textContent = "Prices provided by CoinGecko; values may be delayed.";
+    box.appendChild(note);
+
+    if (box.children.length === 1) {
+      box.textContent = "Live prices are unavailable right now.";
+    }
   } catch (error) {
-    console.log("Unable to load cryptocurrency prices.", error);
+    box.textContent = "Live prices are temporarily unavailable. The sample market values below are not live data.";
   }
 }
 
 updateCryptoPrices();
 setInterval(updateCryptoPrices, 60000);
-  </script>
+</script>  
 </body></html>
